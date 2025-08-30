@@ -29,6 +29,7 @@
     }
     button {
       padding: 10px 20px;
+      margin-right: 10px;
       background: #4CAF50;
       border: none;
       border-radius: 5px;
@@ -65,6 +66,7 @@
     </label>
     <br><br>
     <button onclick="formatar()">Formatar</button>
+    <button onclick="baixar()">Baixar TXT</button>
 
     <h3>Resultado:</h3>
     <pre id="resultado"></pre>
@@ -72,13 +74,14 @@
 
   <script>
     function formatarParaSlides(texto, maxPalavrasPorLinha = 4, maxLinhasPorSlide = 4) {
-      // Corrigir hifens
-      texto = texto.replace(/s-s/g, "-");
+      // Corrigir hifens (igual ao Python)
+      texto = texto.replace(/-s-/g, "-");
 
-      const palavras = texto.split(/\s+/);
+      const palavras = texto.trim().split(/\s+/);
       let linhas = [];
       let linhaAtual = [];
 
+      // monta as linhas
       for (let palavra of palavras) {
         linhaAtual.push(palavra);
         if (linhaAtual.length === maxPalavrasPorLinha) {
@@ -90,6 +93,7 @@
         linhas.push(linhaAtual.join(" "));
       }
 
+      // monta os slides
       let slides = [];
       let slideAtual = [];
 
@@ -114,6 +118,19 @@
 
       const resultado = formatarParaSlides(texto, maxPalavras, maxLinhas);
       document.getElementById("resultado").textContent = resultado;
+    }
+
+    function baixar() {
+      const conteudo = document.getElementById("resultado").textContent;
+      if (!conteudo) {
+        alert("Primeiro formate o texto!");
+        return;
+      }
+      const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "hino_formatado.txt";
+      link.click();
     }
   </script>
 </body>
