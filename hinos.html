@@ -2,131 +2,183 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Formatar Texto para Slides</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formatador de Texto para Slides</title>
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;}
+    body {
+      background: linear-gradient(135deg, #f0f4f8, #e8f0fe, #ffffff); /* fundo claro e suave */
+      font-family: 'Poppins', sans-serif;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 50px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    h1 {
+      text-align:center;
+      margin-bottom:25px;
+      font-size:2rem;
+      color:#262b38; /* azul suave */
+      font-weight:700;
+      letter-spacing:-0.5px;
+    }
+    .form-section {display:flex;gap:25px;flex-wrap:wrap;}
+    textarea {
+      flex:2;min-height:250px;padding:14px 16px;border-radius:14px;
+      border:1px solid #cbd5e1;resize:none;font-size:15px;font-family:inherit;
+      background:#f8fafc;transition:border 0.3s, box-shadow 0.3s;
+    }
+    textarea:focus textarea:focus {
+  border-color:#2563eb; /* azul médio pacífico */
+  box-shadow:0 0 0 3px rgba(37, 99, 235, 0.25); /* sombra azul clarinha */
+  outline:none;
+}
+  
+    .config {flex:1;display:flex;flex-direction:column;gap:20px;}
+    .inputs {
+      display:flex;flex-direction:column;gap:15px;background:#f9fafb;
+      padding:15px;border-radius:14px;border:1px solid #e2e8f0;
+    }
+    .inputs label {font-size:14px;font-weight:600;color:#334155;display:flex;flex-direction:column;gap:6px;}
+    .inputs input {
+      width:100%;padding:10px;border-radius:10px;border:1px solid #cbd5e1;
+      font-size:14px;transition:0.3s;
+    }
+    .inputs input:focus {
+      border-color:#334155;
+      box-shadow:0 0 0 3px rgba(99, 208, 241, 0.2);
+      outline:none;
+    }
+    .botoes {display:flex;flex-direction:column;gap:12px;}
+    .botoes button {
+      background: linear-gradient(90deg, #2563eb, #3b82f6); /* azul pacífico */
+      color:white;font-weight:600;border:none;padding:12px;border-radius:14px;
+      cursor:pointer;transition:all 0.3s ease;font-size:15px;letter-spacing:0.3px;
+    }
+    .botoes button:hover {
+      transform:translateY(-2px);
+      box-shadow:0 6px 14px rgba(114, 114, 122, 0.3);
+    }
+    .resultado {
+      margin-top:25px;width:100%;min-height:180px;padding:14px 16px;
+      border-radius:14px;border:1px solid #cbd5e1;resize:vertical;font-size:15px;
+      background:#f8fafc;
+    }
+    h3 {margin-top:30px;font-size:1.2rem;font-weight:600;color:#363e50;}
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2563eb; /* azul pacífico */
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      z-index: 9999;
+    }
+    .toast.show {opacity: 1;transform: translateY(0);}
+
+    @media (max-width: 768px) {
+      .form-section {flex-direction:column;}
+      textarea {min-height:200px;}
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-start justify-center p-6">
-  <div class="bg-white shadow-lg rounded-2xl w-full max-w-3xl p-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📖 Formatador de Texto para Slides</h2>
-    
-    <!-- Caixa de texto -->
-    <textarea id="inputTexto" 
-      class="w-full h-40 border border-gray-300 rounded-xl p-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 mb-4" 
-      placeholder="Cole seu texto aqui..."></textarea>
-    
-    <!-- Configurações -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-      <div>
-        <label class="block text-gray-600 font-medium mb-1">Máx. palavras por linha:</label>
-        <input type="number" id="maxPalavras" value="4" min="1"
-          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
-      </div>
-      <div>
-        <label class="block text-gray-600 font-medium mb-1">Máx. linhas por slide:</label>
-        <input type="number" id="maxLinhas" value="4" min="1"
-          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400">
+<body>
+  <div class="container">
+    <h1>📖 Formatador de Texto para Slides</h1>
+    <div class="form-section">
+      <textarea id="entrada" placeholder="Cole seu texto aqui..."></textarea>
+      <div class="config">
+        <div class="inputs">
+          <label>Máx. palavras por linha:<input type="number" id="maxPalavras" value="4"></label>
+          <label>Máx. linhas por slide:<input type="number" id="maxLinhas" value="4"></label>
+        </div>
+        <div class="botoes">
+          <button onclick="formatarTexto()">✨ Formatar</button>
+          <button onclick="baixarTXT()">⬇️ Baixar TXT</button>
+          <button onclick="copiarTexto()">📋 Copiar</button>
+        </div>
       </div>
     </div>
-
-    <!-- Botões -->
-    <div class="flex flex-wrap gap-3 mb-6">
-      <button onclick="formatar()" 
-        class="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-xl shadow">
-        Formatar
-      </button>
-      <button onclick="baixar()" 
-        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-xl shadow">
-        Baixar TXT
-      </button>
-      <button onclick="copiar()" 
-        class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-xl shadow">
-        Copiar
-      </button>
-    </div>
-
-    <!-- Resultado -->
-    <h3 class="text-lg font-semibold text-gray-700 mb-2">Resultado:</h3>
-    <pre id="resultado" 
-      class="bg-gray-50 border border-gray-300 rounded-xl p-4 text-gray-800 whitespace-pre-wrap"></pre>
+    <h3>Resultado:</h3>
+    <textarea class="resultado" id="saida" readonly></textarea>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
-    function formatarParaSlides(texto, maxPalavrasPorLinha = 4, maxLinhasPorSlide = 4) {
-      // Corrigir hifens
-      texto = texto.replace(/\s*-\s*/g, "-");
-
-      const palavras = texto.trim().split(/\s+/);
-      let linhas = [];
-      let linhaAtual = [];
-
-      for (let palavra of palavras) {
-        linhaAtual.push(palavra);
-        if (linhaAtual.length === maxPalavrasPorLinha) {
-          linhas.push(linhaAtual.join(" "));
-          linhaAtual = [];
-        }
-      }
-      if (linhaAtual.length > 0) {
-        linhas.push(linhaAtual.join(" "));
-      }
-
-      let slides = [];
-      let slideAtual = [];
-
-      for (let linha of linhas) {
-        slideAtual.push(linha);
-        if (slideAtual.length === maxLinhasPorSlide) {
-          slides.push(slideAtual.join("\n"));
-          slideAtual = [];
-        }
-      }
-      if (slideAtual.length > 0) {
-        slides.push(slideAtual.join("\n"));
-      }
-
-     return slides.join("\n\n");
-
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2000);
     }
 
-    function formatar() {
-      const texto = document.getElementById("inputTexto").value;
-      const maxPalavras = parseInt(document.getElementById("maxPalavras").value);
-      const maxLinhas = parseInt(document.getElementById("maxLinhas").value);
+    function formatarTexto() {
+      const texto = document.getElementById("entrada").value.trim();
+      const maxPalavras = parseInt(document.getElementById("maxPalavras").value) || 4;
+      const maxLinhas = parseInt(document.getElementById("maxLinhas").value) || 4;
+      if (!texto) {showToast("⚠️ Cole algum texto primeiro!");return;}
 
-      const resultado = formatarParaSlides(texto, maxPalavras, maxLinhas);
-      document.getElementById("resultado").textContent = resultado;
+      const palavras = texto.split(/\s+/);
+      let linhas = [], linha = [];
+      palavras.forEach(p => {
+        linha.push(p);
+        if (linha.length >= maxPalavras) {
+          linhas.push(linha.join(" "));
+          linha = [];
+        }
+      });
+      if (linha.length) linhas.push(linha.join(" "));
+
+      let slides = [], bloco = [];
+      linhas.forEach(l => {
+        bloco.push(l);
+        if (bloco.length >= maxLinhas) {
+          slides.push(bloco.join("\n"));
+          bloco = [];
+        }
+      });
+      if (bloco.length) slides.push(bloco.join("\n"));
+
+      document.getElementById("saida").value = slides.join("\n\n");
+      showToast("✅ Texto formatado!");
     }
 
-    function baixar() {
-      const conteudo = document.getElementById("resultado").textContent;
-      if (!conteudo) {
-        alert("Primeiro formate o texto!");
-        return;
-      }
+    function copiarTexto() {
+      const saida = document.getElementById("saida");
+      if (!saida.value.trim()) {showToast("⚠️ Nada para copiar!");return;}
+      navigator.clipboard.writeText(saida.value)
+        .then(() => showToast("📋 Copiado!"))
+        .catch(() => showToast("❌ Erro ao copiar!"));
+    }
 
-      let nomeArquivo = prompt("Digite o nome do arquivo (sem .txt):", "hino_formatado");
-      if (!nomeArquivo) return; // usuário cancelou
-
-      if (!nomeArquivo.toLowerCase().endsWith(".txt")) {
-        nomeArquivo += ".txt";
-      }
-
-      const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+    function baixarTXT() {
+      const saida = document.getElementById("saida").value;
+      if (!saida.trim()) {showToast("⚠️ Nada para baixar!");return;}
+      const nome = prompt("Digite o nome do arquivo:", "slides.txt");
+      if (!nome) return;
+      const blob = new Blob([saida], {type: "text/plain"});
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = nomeArquivo;
+      link.download = nome.endsWith(".txt") ? nome : nome+".txt";
       link.click();
-    }
-
-    function copiar() {
-      const conteudo = document.getElementById("resultado").textContent;
-      if (!conteudo) {
-        alert("Primeiro formate o texto!");
-        return;
-      }
-      navigator.clipboard.writeText(conteudo).then(() => {
-        alert("Texto copiado para a área de transferência!");
-      });
     }
   </script>
 </body>
